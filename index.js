@@ -4,6 +4,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const User = require("./models/users");
+const generateReferralId = require("./logic/generateReferralId");
 
 const app = express();
 
@@ -39,17 +40,10 @@ app.get("/api/users", (req, res) => {
 
 // Add User
 app.post("/api/users", (req, res) => {
-  const generateReferralId = (username) => {
-    const [firstname, ...rest] = username.split(" ");
-    return `${firstname.toUpperCase()}${Math.floor(
-      10000 + Math.random() * 90000
-    )}`;
-  };
   const updatedData = {
     referral_id: generateReferralId(req.body.name),
     ...req.body,
   };
-  console.log(updatedData, "update data ===");
   const newUser = new User(updatedData);
   newUser
     .save()
