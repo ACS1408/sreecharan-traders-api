@@ -5,6 +5,9 @@ app: sreecharan-traders-api
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: sreecharan-traders-api
 
+plugins:
+  - serverless-dotenv-plugin
+
 provider:
   name: aws
   runtime: nodejs20.x
