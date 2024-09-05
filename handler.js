@@ -6,6 +6,9 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const User = require("./models/users");
 const generateReferralId = require("./logic/generateReferralId");
+const adminData = require("./models/admin");
+
+const jwt = require("jsonwebtoken");
 
 const app = express();
 
@@ -28,8 +31,32 @@ mongoose
   )
   .catch((err) => console.log(err));
 
+// Authentication
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token === null) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body;
+  const user = { name: username };
+  if (username === adminData?.username && password === adminData?.password) {
+    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
+    res.json({ accessToken });
+  } else {
+    res.status(401).json({ message: "Invalid username or password" });
+  }
+});
+
 // Get User
-app.get("/api/users", (req, res) => {
+app.get("/api/users", authenticateToken, (req, res) => {
   User.find()
     .sort({ createdAt: -1 })
     .then((result) => {
@@ -40,7 +67,7 @@ app.get("/api/users", (req, res) => {
 });
 
 // Add User
-app.post("/api/users", (req, res) => {
+app.post("/api/users", authenticateToken, (req, res) => {
   const updatedData = {
     referral_id: generateReferralId(req.body.name),
     ...req.body,
