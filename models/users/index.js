@@ -13,22 +13,18 @@ const userSchema = new Schema(
     },
     email: {
       type: String,
-      required: true,
+      required: false,
     },
-    shipping_address: {
+    phone: {
       type: String,
       required: true,
     },
-    billing_address: {
-      type: String,
-      required: true,
-    },
-    amount: {
+    address: {
       type: String,
       required: false,
     },
-    quantity: {
-      type: Number,
+    amount: {
+      type: String,
       required: true,
     },
   },
